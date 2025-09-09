@@ -1,38 +1,35 @@
-// api/generate.js
-import { analyzeAudio } from "../src/audio/analyze.js";
-import { planMotifs } from "../src/motif/plan.js";
-import { solveChart } from "../src/solver/solve.js";
-import { decorateV3 } from "../src/decor/decorate.js";
-import { lightChroma } from "../src/lighting/chroma.js";
-import { packageZip } from "../src/pack/package.js";
+// pages/api/generate.js
+import formidable from "formidable";
+import fs from "fs";
+import { analyzeAudio } from "../../src/analyzeAudio";
+import { generateHardMap } from "../../src/generateHardMap";
+
+export const config = {
+  api: { bodyParser: false },
+};
 
 export default async function handler(req, res) {
-  try {
-    const { url } = req.body || {};
-    if (!url) return res.status(400).json({ error: "Missing audio URL" });
-
-    // Step 1: Analyze audio
-    const feats = await analyzeAudio(url);
-
-    // Step 2: Plan motifs
-    const motifs = planMotifs(feats);
-
-    // Step 3: Solve chart
-    const chart = solveChart(feats, motifs);
-
-    // Step 4: Decorate with arcs/chains
-    const v3 = decorateV3(chart);
-
-    // Step 5: Lighting
-    const lit = lightChroma(v3, feats);
-
-    // Step 6: Package into zip
-    const zip = await packageZip(lit, { songName: feats.meta?.title || "Untitled" });
-
-    res.setHeader("Content-Type", "application/zip");
-    res.send(zip);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Only POST allowed" });
   }
+
+  const form = formidable({ multiples: false });
+  form.parse(req, async (err, fields, files) => {
+    if (err) return res.status(500).json({ error: "Upload failed" });
+
+    const audioPath = files.file.filepath;
+
+    // 1. Analyze audio
+    const analysis = await analyzeAudio(audioPath);
+
+    // 2. Generate Hard map
+    const outputPath = "./tmp/Hard.dat";
+    generateHardMap(analysis, outputPath);
+
+    // 3. Send back file
+    const fileBuffer = fs.readFileSync(outputPath);
+    res.setHeader("Content-Disposition", "attachment; filename=Hard.dat");
+    res.setHeader("Content-Type", "application/json");
+    res.send(fileBuffer);
+  });
 }
