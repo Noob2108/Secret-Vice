@@ -1,0 +1,15 @@
+{
+  "name": "secret-vice",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node api/generate.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1",
+    "music-metadata": "^7.14.0",
+    "meyda": "^5.6.0"
+  }
+}
