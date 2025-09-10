@@ -4,12 +4,18 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node api/generate.js",
-    "test": "node --test"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
+    "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
-    "music-metadata": "^7.14.0",
-    "meyda": "^5.6.0"
+    "meyda": "^5.6.0",
+    "next": "14.2.11",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "wavesurfer.js": "^7.8.6"
   }
 }
