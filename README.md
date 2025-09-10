@@ -1,17 +1,13 @@
-# Eternal Vice
+# Secret Vice (MVP)
 
-⚡ The automapper to end all automappers.  
-Generates Beat Saber **v3 maps** (arcs, chains, Chroma lights) with a constraint solver + motif planner.
+Next.js + client-side Meyda. Upload audio → analyze → generate **Hard** v3 map → download zip.
 
-## Status
-🚧 Early alpha — under heavy construction.
+## Dev
+npm i
+npm run dev
 
-## Vision
-- Audio → motifs (musical patterns).
-- Motifs → playable charts (beam search with playability rules).
-- Decorator adds arcs/chains/obstacles.
-- Lighting module adds tasteful Chroma events.
-- Evaluator auto-fixes until every bar passes quality checks.
+## Deploy
+Push to GitHub → Import in Vercel → Deploy. No serverless routes needed for MVP.
 
 ## License
-AGPLv3 — if you host it, you must release your modifications.
+Core mapping logic © AGPLv3. UI can be MIT if you split later.
