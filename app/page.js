@@ -7,29 +7,29 @@ import { generateHardMap } from "../lib/generateHardMap";
 import { exportZip } from "../lib/exportZip";
 
 const MAP_TYPES = [
-  { value: "tech", label: "Tech (streamy / competitive)" },
-  { value: "dancey", label: "Dancey (flow / body movement)" },
-  { value: "showpiece", label: "Showpiece (cinematic flair)" },
+  { value: "tech", label: "Tech — streamy/competitive" },
+  { value: "dancey", label: "Dancey — flow/body" },
+  { value: "showpiece", label: "Showpiece — cinematic" },
 ];
 
 const LIGHT_TYPES = [
-  { value: "concert", label: "Concert (stage flash)" },
-  { value: "cyberpunk", label: "Cyberpunk (neon pulses + rings)" },
+  { value: "concert", label: "Concert — stage flash" },
+  { value: "cyberpunk", label: "Cyberpunk — neon pulses" },
 ];
 
 export default function Page() {
   const fileRef = useRef(null);
-  const [status, setStatus] = useState("Drop a song and hit Generate");
+  const [status, setStatus] = useState("Drop a song, pick options, hit Generate.");
   const [bpm, setBpm] = useState(null);
-
-  // UI controls
-  const [mapType, setMapType] = useState("dancey");
-  const [lightType, setLightType] = useState("cyberpunk");
-  const [primaryColor, setPrimaryColor] = useState("#ff2aa0");   // hot pink vibe
-  const [secondaryColor, setSecondaryColor] = useState("#6a5cff"); // violet/blue
   const [isWorking, setIsWorking] = useState(false);
 
-  // simple seedable rng (so Auto Pick can feel stable per-file name)
+  // UI state
+  const [mapType, setMapType] = useState("dancey");
+  const [lightType, setLightType] = useState("cyberpunk");
+  const [primaryColor, setPrimaryColor] = useState("#ff2aa0");
+  const [secondaryColor, setSecondaryColor] = useState("#6a5cff");
+
+  // RNG for Auto Pick
   const rng = useMemo(() => {
     return (seedStr = "secret-vice") => {
       let h = 2166136261 >>> 0;
@@ -46,9 +46,8 @@ export default function Page() {
     };
   }, []);
 
-  function autoPickFrom(arr, rnd) {
-    return arr[Math.floor(rnd() * arr.length)];
-  }
+  function autoPickFrom(arr, rnd) { return arr[Math.floor(rnd() * arr.length)]; }
+  const randHex = (rnd) => "#" + Math.floor(rnd() * 0xffffff).toString(16).padStart(6, "0");
 
   async function onAutoPick(e) {
     e.preventDefault();
@@ -56,29 +55,19 @@ export default function Page() {
     const seed = file ? file.name : `${Date.now()}`;
     const rnd = rng(seed);
 
-    // randomize map & lights
-    const newMap = autoPickFrom(MAP_TYPES.map(m => m.value), rnd);
-    const newLight = autoPickFrom(LIGHT_TYPES.map(l => l.value), rnd);
-
-    // randomize colors in HSV-ish space then convert to hex quickly
-    const randHex = () =>
-      "#" + Math.floor(rnd() * 0xffffff).toString(16).padStart(6, "0");
-
-    setMapType(newMap);
-    setLightType(newLight);
-    setPrimaryColor(randHex());
-    setSecondaryColor(randHex());
-
-    setStatus(`Auto-picked → Map: ${newMap}, Lights: ${newLight}`);
+    const mt = autoPickFrom(MAP_TYPES.map(x => x.value), rnd);
+    const lt = autoPickFrom(LIGHT_TYPES.map(x => x.value), rnd);
+    setMapType(mt);
+    setLightType(lt);
+    setPrimaryColor(randHex(rnd));
+    setSecondaryColor(randHex(rnd));
+    setStatus(`Auto-picked → Map: ${mt}, Lights: ${lt}`);
   }
 
   async function onGenerate(e) {
     e.preventDefault();
     const file = fileRef.current?.files?.[0];
-    if (!file) {
-      setStatus("Pick an audio file first.");
-      return;
-    }
+    if (!file) { setStatus("Pick an audio file first."); return; }
 
     setIsWorking(true);
     try {
@@ -88,12 +77,9 @@ export default function Page() {
 
       setStatus(`Generating Hard (BPM ${analysis.tempo})…`);
       const { bpm, map } = generateHardMap(analysis, {
-        preset: mapType,         // "tech" | "dancey" | "showpiece"
-        lights: lightType,       // "concert" | "cyberpunk"
-        colors: {                // passed through for future lighting palettes
-          primary: primaryColor,
-          secondary: secondaryColor,
-        },
+        preset: mapType,
+        lights: lightType,
+        colors: { primary: primaryColor, secondary: secondaryColor },
       });
 
       setStatus("Packaging zip…");
@@ -109,121 +95,88 @@ export default function Page() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black text-white">
-      <div className="w-full max-w-xl p-6 rounded-2xl bg-zinc-900 shadow-xl">
-        <h1 className="text-2xl font-bold mb-2">Secret Vice Automapper</h1>
-        <p className="text-sm opacity-80 mb-4">
-          Upload audio → analyze in-browser → auto-map (Hard) → download a Beat Saber zip.
-        </p>
-
-        <form className="space-y-4" onSubmit={onGenerate}>
-          {/* File input */}
-          <input
-            ref={fileRef}
-            type="file"
-            accept="audio/*"
-            className="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-fuchsia-600 file:text-white file:px-4 file:py-2"
-          />
-
-          {/* Controls row */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {/* Map type */}
-            <label className="text-sm">
-              <span className="block mb-1 opacity-80">Map type</span>
-              <select
-                value={mapType}
-                onChange={(e) => setMapType(e.target.value)}
-                className="w-full bg-zinc-800 rounded-lg px-3 py-2 outline-none"
-              >
-                {MAP_TYPES.map((m) => (
-                  <option key={m.value} value={m.value}>{m.label}</option>
-                ))}
-              </select>
-            </label>
-
-            {/* Lighting */}
-            <label className="text-sm">
-              <span className="block mb-1 opacity-80">Lighting</span>
-              <select
-                value={lightType}
-                onChange={(e) => setLightType(e.target.value)}
-                className="w-full bg-zinc-800 rounded-lg px-3 py-2 outline-none"
-              >
-                {LIGHT_TYPES.map((l) => (
-                  <option key={l.value} value={l.value}>{l.label}</option>
-                ))}
-              </select>
-            </label>
-
-            {/* Primary colour */}
-            <label className="text-sm">
-              <span className="block mb-1 opacity-80">Primary colour</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="w-10 h-10 p-0 bg-transparent border-0"
-                  title="Pick primary color"
-                />
-                <input
-                  type="text"
-                  value={primaryColor}
-                  onChange={(e) => setPrimaryColor(e.target.value)}
-                  className="flex-1 bg-zinc-800 rounded-lg px-3 py-2 outline-none"
-                  placeholder="#ff00aa"
-                />
-              </div>
-            </label>
-
-            {/* Secondary colour */}
-            <label className="text-sm">
-              <span className="block mb-1 opacity-80">Secondary colour</span>
-              <div className="flex items-center gap-2">
-                <input
-                  type="color"
-                  value={secondaryColor}
-                  onChange={(e) => setSecondaryColor(e.target.value)}
-                  className="w-10 h-10 p-0 bg-transparent border-0"
-                  title="Pick secondary color"
-                />
-                <input
-                  type="text"
-                  value={secondaryColor}
-                  onChange={(e) => setSecondaryColor(e.target.value)}
-                  className="flex-1 bg-zinc-800 rounded-lg px-3 py-2 outline-none"
-                  placeholder="#6a5cff"
-                />
-              </div>
-            </label>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
-            <button
-              type="button"
-              onClick={onAutoPick}
-              className="px-4 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 transition"
-              disabled={isWorking}
-            >
-              Auto Pick Everything
-            </button>
-
-            <button
-              type="submit"
-              className="px-5 py-2 rounded-lg bg-fuchsia-600 hover:bg-fuchsia-500 transition disabled:opacity-60"
-              disabled={isWorking}
-            >
-              {isWorking ? "Working…" : "Generate Hard"}
-            </button>
-          </div>
-        </form>
-
-        <div className="mt-4 text-sm opacity-80">
-          {status}{bpm ? ` • BPM ${bpm}` : ""}
+    <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+      <div className="w-full max-w-3xl">
+        {/* Header */}
+        <div className="mb-5">
+          <h1 className="text-3xl font-bold">Secret Vice Automapper</h1>
+          <p className="opacity-75 text-sm">Upload → analyze → auto-map (Hard) → download zip.</p>
         </div>
 
-        <div className="mt-3 text-xs opacity-60">
+        {/* Panel */}
+        <div className="grid md:grid-cols-3 gap-4">
+          {/* Card: File */}
+          <div className="md:col-span-3 rounded-2xl bg-zinc-900 p-4 shadow-lg">
+            <label className="text-sm opacity-80 block mb-2">Audio file</label>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="audio/*"
+              className="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-fuchsia-600 file:text-white file:px-4 file:py-2"
+            />
+          </div>
+
+          {/* Card: Map */}
+          <div className="rounded-2xl bg-zinc-900 p-4 shadow-lg">
+            <div className="text-sm opacity-80 mb-2">Map type</div>
+            <select
+              value={mapType}
+              onChange={(e) => setMapType(e.target.value)}
+              className="w-full bg-zinc-800 rounded-lg px-3 py-2 outline-none"
+            >
+              {MAP_TYPES.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          </div>
+
+          {/* Card: Lighting */}
+          <div className="rounded-2xl bg-zinc-900 p-4 shadow-lg">
+            <div className="text-sm opacity-80 mb-2">Lighting</div>
+            <select
+              value={lightType}
+              onChange={(e) => setLightType(e.target.value)}
+              className="w-full bg-zinc-800 rounded-lg px-3 py-2 outline-none"
+            >
+              {LIGHT_TYPES.map((l) => <option key={l.value} value={l.value}>{l.label}</option>)}
+            </select>
+          </div>
+
+          {/* Card: Colours */}
+          <div className="rounded-2xl bg-zinc-900 p-4 shadow-lg">
+            <div className="text-sm opacity-80 mb-3">Custom colours</div>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="text-xs opacity-70 w-20">Primary</div>
+              <input type="color" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="w-10 h-10 p-0 bg-transparent border-0" />
+              <input type="text" value={primaryColor} onChange={(e) => setPrimaryColor(e.target.value)} className="flex-1 bg-zinc-800 rounded-lg px-3 py-2 outline-none" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-xs opacity-70 w-20">Secondary</div>
+              <input type="color" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="w-10 h-10 p-0 bg-transparent border-0" />
+              <input type="text" value={secondaryColor} onChange={(e) => setSecondaryColor(e.target.value)} className="flex-1 bg-zinc-800 rounded-lg px-3 py-2 outline-none" />
+            </div>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-wrap items-center gap-3 mt-4">
+          <button
+            type="button"
+            onClick={onAutoPick}
+            className="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 transition"
+            disabled={isWorking}
+          >
+            Auto Pick Everything
+          </button>
+          <button
+            onClick={onGenerate}
+            className="px-5 py-2 rounded-xl bg-fuchsia-600 hover:bg-fuchsia-500 transition disabled:opacity-60"
+            disabled={isWorking}
+          >
+            {isWorking ? "Working…" : "Generate Hard"}
+          </button>
+          <div className="text-sm opacity-80 ml-auto">{status}{bpm ? ` • BPM ${bpm}` : ""}</div>
+        </div>
+
+        <div className="mt-2 text-xs opacity-60">
           For best compatibility, prefer <b>.ogg</b>. By uploading, you confirm you have rights to the track.
         </div>
       </div>
