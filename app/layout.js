@@ -1,14 +1,18 @@
 // app/layout.js
+import "./globals.css";
+import Header from "./components/Header";
+
 export const metadata = {
   title: "Secret Vice Automapper",
-  description: "Upload → analyze → auto-map → download",
+  description: "Beat Saber automapper by Secret Vice",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body style={{ margin: 0, background: "#000", color: "#fff" }}>
-        {children}
+      <body className="bg-black text-white font-sans">
+        <Header />   {/* 🔥 add this line */}
+        <main>{children}</main>
       </body>
     </html>
   );
