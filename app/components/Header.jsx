@@ -3,36 +3,41 @@ import Image from "next/image";
 
 export default function Header() {
   return (
-    <header className="relative w-full flex items-center px-6 py-4 bg-black text-white overflow-hidden">
-      {/* Background logo (faded, behind everything) */}
-      <div className="absolute inset-0 flex justify-center items-center opacity-10 pointer-events-none">
+    <header
+      style={{
+        position: "relative",
+        height: 96,
+        padding: "12px 20px",
+        zIndex: 20,           // above the background watermark
+        background: "transparent",
+      }}
+    >
+      {/* Top-right full logo */}
+      <div style={{ position: "absolute", right: 20, top: 8 }}>
         <Image
-          src="/logo.png"
-          alt="Secret Vice Background Logo"
-          width={600}
-          height={600}
-          className="object-contain"
+          src="/sv-logo.png"     // full logo
+          alt="Secret Vice"
+          width={78} height={78} // slightly bigger than before
+          priority
+          style={{ objectFit: "contain" }}
         />
       </div>
 
-      {/* Foreground content */}
-      <div className="relative z-10 flex items-center gap-4">
-        {/* Full logo (small, top-left) */}
+      {/* Title centered */}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
         <Image
-          src="/sv-logo.png"
-          alt="Secret Vice Full Logo"
-          width={60}
-          height={60}
-          className="object-contain"
-        />
-
-        {/* Title image instead of plain text */}
-        <Image
-          src="/Title_image.png"
-          alt="Secret Vice Automapper Title"
-          width={200}
-          height={60}
-          className="object-contain drop-shadow-lg"
+          src="/Title_image.png" // wordmark
+          alt="Secret Vice Automapper"
+          width={340} height={80} // adjust if you want it bigger/smaller
+          priority
+          style={{ objectFit: "contain", filter: "drop-shadow(0 0 10px rgba(255,42,160,.25))" }}
         />
       </div>
     </header>
