@@ -45,3 +45,60 @@ body{
   padding:8px 12px;
   cursor:pointer;
 }
+/* ---- SV Console Layout ---- */
+.container{
+  min-height: calc(100vh - 96px); /* below header */
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.console{
+  width: 100%;
+  max-width: 880px;
+}
+
+/* Card */
+.card{
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0,0,0,.45), inset 0 0 0 1px rgba(255,255,255,.06);
+}
+.cardHead{
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom: 10px;
+}
+.cardHead h2{
+  margin:0; font-size:18px; letter-spacing:.4px; opacity:.9;
+}
+
+/* Rows */
+.row{ display:grid; grid-template-columns: 140px 1fr auto; gap:12px; align-items:center; margin:12px 0; }
+.row.two{ grid-template-columns: 1fr 1fr; }
+.label{ opacity:.8; font-size:14px; }
+.value{ width:38px; text-align:right; opacity:.8; }
+
+/* Inputs */
+.input, .select{
+  width:100%; padding:10px 12px; border-radius:10px;
+  background: rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+  color:#fff;
+}
+.input[type="color"]{ padding:4px; height:38px; }
+.slider{ width:100%; accent-color: var(--brand); }
+
+/* Buttons */
+.actions{ display:flex; justify-content:flex-end; gap:10px; margin-top:10px; }
+.btn{
+  padding:10px 14px; border-radius:10px; border:1px solid transparent;
+  cursor:pointer; transition:.2s ease;
+}
+.btn.primary{
+  background: linear-gradient(90deg, var(--brand), var(--brand2));
+  color:#000; font-weight:700; letter-spacing:.3px;
+  box-shadow: 0 0 24px rgba(255,42,160,.25), 0 0 24px rgba(0,201,255,.15);
+}
+.btn.primary:disabled{ filter:grayscale(.4); opacity:.7; cursor:not-allowed; }
+.btn.ghost{
+  background: transparent; color:#fff; border-color: rgba(255,255,255,.12);
+}
+.status{ margin-top:10px; opacity:.75; font-size:13px; }
