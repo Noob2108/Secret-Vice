@@ -3,44 +3,55 @@ import Image from "next/image";
 
 export default function Header() {
   return (
-    <header className="relative w-full flex items-center px-6 py-4 bg-black text-white overflow-hidden">
-      {/* Background faded logo */}
-      <div className="absolute inset-0 flex justify-center items-center opacity-10 pointer-events-none">
+    <header
+      style={{
+        position: "relative",
+        height: 96,
+        padding: "12px 20px",
+        zIndex: 20,
+        background: "transparent",
+      }}
+    >
+      {/* Top-left corner logo */}
+      <div style={{ position: "absolute", left: 20, top: 8 }}>
         <Image
           src="/logo.png"
-          alt="Secret Vice Background Logo"
-          width={600}
-          height={600}
-          className="object-contain"
+          alt="SV glyph left"
+          width={78}
+          height={78}
+          priority
+          style={{ objectFit: "contain" }}
         />
       </div>
 
-      {/* Title image top center */}
-      <div className="relative z-10 flex-1 flex justify-center">
+      {/* Top-right corner logo */}
+      <div style={{ position: "absolute", right: 20, top: 8 }}>
+        <Image
+          src="/logo.png"
+          alt="SV glyph right"
+          width={78}
+          height={78}
+          priority
+          style={{ objectFit: "contain" }}
+        />
+      </div>
+
+      {/* Title centered */}
+      <div
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
         <Image
           src="/Title_image.png"
-          alt="Secret Vice Automapper Title"
-          width={260}
+          alt="Secret Vice Automapper"
+          width={340}
           height={80}
-          className="object-contain drop-shadow-lg"
-        />
-      </div>
-
-      {/* Right corner duplicate logos */}
-      <div className="flex items-center gap-4 ml-auto">
-        <Image
-          src="/logo.png"
-          alt="Secret Vice Glyph Logo"
-          width={80}
-          height={80}
-          className="object-contain"
-        />
-        <Image
-          src="/logo.png"
-          alt="Secret Vice Glyph Logo Duplicate"
-          width={80}
-          height={80}
-          className="object-contain"
+          priority
+          style={{ objectFit: "contain", filter: "drop-shadow(0 0 10px rgba(255,42,160,.25))" }}
         />
       </div>
     </header>
